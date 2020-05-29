@@ -1,19 +1,33 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <b-container >
+      <b-row>
+        <b-col sm="6">
+          <b-row class="user-panel"><p style="margin: auto">User: <b> Admin </b></p></b-row>
+          <b-row class="pr-panel"><ProductPanel /></b-row>
+        </b-col>
+        <b-col class="pr-table" sm="6"><ProductList /></b-col>
+      </b-row>
+    </b-container>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import ProductPanel from "./components/product-panel.vue";
+import ProductList from "./components/product-list.vue";
 
 export default {
-  name: 'App',
+  name: "App",
+  created() {
+    if (!localStorage.products) {
+      localStorage.products = JSON.stringify([]);
+    }
+  },
   components: {
-    HelloWorld
-  }
-}
+    ProductPanel,
+    ProductList,
+  },
+};
 </script>
 
 <style>
@@ -22,7 +36,10 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  margin-top: 30px;
+}
+.user-panel {
+  min-height: 40px;
+  font-size: 20px;
 }
 </style>
