@@ -13,6 +13,9 @@
 
 <script>
 export default {
+  props: {
+    items: null,
+  },
   data() {
     return {
       fields: [
@@ -33,7 +36,6 @@ export default {
           sortable: false,
         },
       ],
-      items: JSON.parse(localStorage.products),
     };
   },
   components: {},

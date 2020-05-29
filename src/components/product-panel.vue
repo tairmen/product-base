@@ -3,7 +3,7 @@
     <b-container class="buttons-panel">
       <b-row class="my-1">
         <b-col sm="4">
-          <b-button class="bar-item" variant="outline-secondary">Add</b-button>
+          <b-button class="bar-item" @click="addProduct" variant="outline-secondary">Add</b-button>
         </b-col>
         <b-col sm="8">
           <b-form-file
@@ -42,7 +42,7 @@
       <div v-if="!loading && loaded">
         <b-row>
           <b-col sm="12">
-            <label>{{ formTitle }}</label>
+            <label><b>{{ formTitle }}</b></label>
           </b-col>
         </b-row>
         <b-row>
@@ -52,7 +52,10 @@
           <b-col sm="9">
             <b-form-input
               v-model="code"
-              disabled
+              :disabled="formTitle != 'Add'"
+              type="number"
+              min="1000000000000" 
+              max="9999999999999"
               placeholder="Code"
             ></b-form-input>
           </b-col>
@@ -105,6 +108,9 @@ import Quagga from "quagga";
 import $ from "jquery";
 
 export default {
+  props: {
+    products: null,
+  },
   data() {
     return {
       state: {
@@ -149,6 +155,7 @@ export default {
       loading: false,
       loaded: false,
       formTitle: "",
+      editedIndex: -1,
       code: null,
       pname: null,
       cost: null,
@@ -157,11 +164,21 @@ export default {
   },
   mounted() {
     let me = this;
-
     Quagga.onDetected(function(result) {
       me.loaded = true;
       me.loading = false;
       me.code = result.codeResult.code;
+      me.editedIndex = me.products.findIndex(el => {
+        return el.code == me.code;
+      });
+      if (me.editedIndex > -1) {
+        me.formTitle = "Finded";
+        me.pname = me.products[me.editedIndex].name;
+        me.amount = me.products[me.editedIndex].amount;
+        me.cost = me.products[me.editedIndex].cost;
+      } else {
+        me.formTitle = "New";
+      }
     });
   },
   methods: {
@@ -173,6 +190,10 @@ export default {
     },
     runClicked() {
       let me = this;
+      me.code = 0;
+      me.pname = "";
+      me.cost = "";
+      me.amount = "";
       me.loaded = false;
       if (me.file) {
         me.loading = true;
@@ -184,6 +205,17 @@ export default {
         }, 3000);
         me.decode(URL.createObjectURL(me.file));
       }
+    },
+    addProduct() {
+      let self = this;
+      self.editedIndex = -1;
+      self.formTitle = "Add";
+      self.loaded = true;
+      self.loading = false;
+      self.code = 0;
+      self.pname = "";
+      self.amount = "";
+      self.cost = "";
     },
     decode(src) {
       let self = this;
@@ -204,8 +236,16 @@ export default {
       res.amount = self.amount;
       res.cost = self.cost;
       let allItems = JSON.parse(localStorage.products);
-      allItems.push(res);
+      if (self.editedIndex == -1) {
+        allItems.push(res);
+      } else {
+        allItems[self.editedIndex] = res;
+      }
       localStorage.products = JSON.stringify(allItems);
+      self.$emit("products-change", allItems);
+      self.errorText = "";
+      self.loaded = false;
+      self.loading = false;
     },
   },
 };
